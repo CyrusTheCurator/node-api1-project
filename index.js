@@ -48,16 +48,13 @@ server.get("/api/users/:id", (req, res) => {
   res.status(200).json(users[idIndex]);
 });
 server.delete("/api/users/:id", (req, res) => {
-  //return user object using ID
   const { id } = req.params;
-  const found = users.find((user) => user.id === id);
-  if (found) {
-    users = users.filter((user) => {
-      user.id === id;
-    });
+  const found = users.filter((user) => user.id === id);
+  if (!found) {
+    res.status(404).json({ message: "user not found" });
+  } else if (found) {
+    users = users.filter((user) => user.id !== id);
     res.status(200).json(found);
-  } else if (!found) {
-    res.status(404).json({ message: "user not found, friend" });
   } else {
     res.status(500).json({ errorMessage: "The user could not be removed" });
   }
@@ -87,6 +84,29 @@ server.patch("/api/users/:id", (req, res) => {
       .json({ errorMessage: "The user information could not be modified." });
   }
 });
+
+server.get("/hobbits", (req, res) => {
+  // query string parameters get added to req.query
+  const sortField = req.query.sortby || "id";
+  console.log(sortField);
+  const hobbits = [
+    {
+      id: 1,
+      name: "Samwise Gamgee",
+    },
+    {
+      id: 2,
+      name: "Frodo Baggins",
+    },
+  ];
+
+  // apply the sorting
+  const response = hobbits.sort((a, b) =>
+    a[sortField] < b[sortField] ? -1 : 1
+  );
+  res.status(200).json(response);
+});
+
 const PORT = 5000;
 server.listen(PORT, () => {
   console.log(`listening on port ${PORT}`);
